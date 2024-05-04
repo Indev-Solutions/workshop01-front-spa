@@ -4,6 +4,8 @@ on:
 #  push:
 #    branches: [ "develop", "feature/**" ]
   workflow_dispatch:
+env:
+  AWS_REGION: us-east-1
 jobs:
   build:
     name: 'Front CI'
@@ -26,3 +28,11 @@ jobs:
           architecture: 'x64'
       - name: Install Node Modules
         run: npm install
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Get Access Token of AWS Cognito
+        run: aws cognito-idp initiate-auth --auth-flow USER_PASSWORD_AUTH --auth-parameters USERNAME=${{ secrets.AWS_COGNITO_USERNAME }},PASSWORD=${{ secrets.AWS_COGNITO_PASSWORD }},SECRET_HASH=${{ secrets.AWS_COGNITO_SECRET_HASH }} --client-id ${{ secrets.AWS_COGNITO_CLIENT_ID }} --output json
