@@ -1,8 +1,27 @@
+import { useRouter } from 'next/router'
 import { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 
-function Football({ initialData }) {
+function Soccer({ initialData }) {
+  const leagues = [
+    {id: 1, name: 'Liga 1 (Peru)'}
+  ];
+
+  const router = useRouter();
+  const token = router.query;
+  
+  const [plays, setPlays] = useState({
+    items: null
+  });
+
+  function initPlaysState(itemsValue) {
+    setPlays({
+      ...plays,
+      items: itemsValue
+    });
+  }
+
   const [play, setPlay] = useState({
     user: '1',
     match: '0',
@@ -93,12 +112,16 @@ function Football({ initialData }) {
     });
   }
 
+  function calculateBenefitAmount(amount, rateBet) {
+    return amount * rateBet;
+  }
+
   function handleChangeForFieldPlayAmount(event) {
     const fieldValue = event.target.value;
     setPlay({
       ...play,
       amount: fieldValue,
-      benefitAmount: fieldValue * play.rateBetOption
+      benefitAmount: calculateBenefitAmount(fieldValue, play.rateBetOption)
     });
   }
 
@@ -117,30 +140,41 @@ function Football({ initialData }) {
     const JSONdata = JSON.stringify(data);
 
     // Set API endpoint
-    const endpoint = 'http://localhost:9090/workshop/plays';
+    const endpoint = process.env.NEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_PLAY + '/workshop/plays';
 
     // Build the request
-    const options = {
+    const options1 = {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
       },
       body: JSONdata
     };
 
     // Send request to API endpoint for saving play
-    const response1 = await fetch(endpoint, options);
-    const dataResult1 = await response1.json();
+    const response1 = await fetch(endpoint, options1);
+    const dataResult = await response1.json();
 
-    alert(dataResult1.id);
+    alert("Play saved with ID " + dataResult.id);
 
     // Reset form
     initPlayState('0');
 
+    // Build the request
+    const options2 = {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      }
+    };
+
     // Send request to API endpoint for getting plays
-    const response2 = await fetch(endpoint);
-    const dataResult2 = await response2.json();
+    const response2 = await fetch(endpoint, options2);
+    initPlaysState(await response2.json());
   };
 
   const handleReset = async (event) => {
@@ -208,14 +242,16 @@ function Football({ initialData }) {
                     <div className="small-text">Liga</div>
                     <div className="small-text">Partido</div>
                     <div>
-                      <select name="liga">
-                        <option value="1">Liga 1 (Peru)</option>
+                      <select name="league">
+                        {leagues.map(({id, name}) => (
+                          <option value={id}>{name}</option>
+                        ))}
                       </select>
                     </div>
                     <div>
                       <select name="match" value={play.match} onChange={handleChangeForFieldMatch}>
                         <option value="0">...</option>
-                        {initialData.map(({ id, match}) => (
+                        {initialData.map(({id, match}) => (
                           <option value={id}>{match}</option>
                         ))}
                       </select>
@@ -262,7 +298,7 @@ function Football({ initialData }) {
               <div className="horizontal-separator"></div>
               <div id="result" className="column-left">
                 <div className="subtitle big-text">Mis apuestas de Futbol</div>
-                <div id="table" className="medium-text">
+                <div id="result-table-header" className="medium-text">
                   <div className="table-header-left table-header table-column-center">Fecha</div>
                   <div className="table-header table-column-center">Liga</div>
                   <div className="table-header table-column-center">Partido</div>
@@ -271,15 +307,19 @@ function Football({ initialData }) {
                   <div className="table-header table-column-center">Estado</div>
                   <div className="table-header table-column-center">Resultado</div>
                   <div className="table-header-right table-header table-column-right">Ganancia</div>
-                  <div className="table-row table-column-center">03/04/2023</div>
-                  <div className="table-row table-column-center">Liga Española</div>
-                  <div className="table-row table-column-center">Real Madrid vs. Barcelona F.C.</div>
-                  <div className="table-row table-column-center">Real Madrid</div>
-                  <div className="table-row table-column-right">S/. 20.00</div>
-                  <div className="table-row table-column-center">Terminado</div>
-                  <div className="table-row table-column-center">Empate</div>
-                  <div className="table-row table-column-right">S/. 0.00</div>
                 </div>
+                {plays.items && plays.items.map(({bet, choice, amount, registrationDate, result}) => (
+                  <div className="result-table-row medium-text">  
+                    <div className="table-row table-column-center">{registrationDate.substring(0, 10)}</div>
+                    <div className="table-row table-column-center">{bet.leagueId}</div>
+                    <div className="table-row table-column-center">{bet.match}</div>
+                    <div className="table-row table-column-center">{choice.description}</div>
+                    <div className="table-row table-column-right">S/. {amount}</div>
+                    <div className="table-row table-column-center">{bet.status}</div>
+                    <div className="table-row table-column-center">{result}</div>
+                    <div className="table-row table-column-right">S/. {calculateBenefitAmount(amount, choice.rate)}</div>
+                  </div>
+                ))}
               </div>
               <div></div>
             </div>
@@ -297,13 +337,28 @@ function Football({ initialData }) {
   )
 }
 
-export async function getServerSideProps() {
+export async function getStaticProps() {
+  const token = process.env.NEXT_PUBLIC_TOKEN_AWS_COGNITO;
+  
+  // Set API endpoint
+  const endpoint = process.env.NEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_BET + '/workshop/bets?leagueId=1' /*+ '&status=1'*/;
+
+  // Build the request
+  const options = {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    }
+  };
+
   // Fetch data from external API
-  const response = await fetch('http://localhost:8080/workshop/bets?leagueId=1&status=2');
+  const response = await fetch(endpoint, options);
   const initialData = await response.json();
  
   // Pass data to the page via props
   return { props: { initialData } }
 }
 
-export default Football
+export default Soccer
