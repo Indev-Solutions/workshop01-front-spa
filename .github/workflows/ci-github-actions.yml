@@ -1,0 +1,21 @@
+name: ReactJS CI
+run-name: ${{ github.actor }} is starting the execution of backend pipeline "ReactJS CI" with GitHub Actions
+on:
+#  push:
+#    branches: [ "develop", "feature/**" ]
+  workflow_dispatch:
+jobs:
+  build:
+    name: 'Front CI'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}

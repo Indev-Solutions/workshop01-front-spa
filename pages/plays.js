@@ -1,7 +1,11 @@
+import { useRouter } from 'next/router'
 import Head from 'next/head';
 import Link from 'next/link';
 
-export default function Plays() {
+function Plays() {
+  const router = useRouter();
+  const dataFromPreviousPage = router.query;  
+
   return (
     <div>
       <Head>
@@ -23,7 +27,16 @@ export default function Plays() {
         </div>
         <div id="content">
           <div id="menu">
-            <div><Link href="/plays/football">Futbol</Link></div>
+            <div>
+              <Link
+                href={{
+                  pathname: "/plays/soccer",
+                  query: dataFromPreviousPage
+                }}
+              >
+                Futbol
+              </Link>
+            </div>
             <div><a href="#">Tenis</a></div>
             <div><a href="#">Basquet</a></div>
           </div>
@@ -69,3 +82,5 @@ export default function Plays() {
     </div>
   )
 }
+
+export default Plays
