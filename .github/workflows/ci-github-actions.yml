@@ -4,6 +4,8 @@ on:
 #  push:
 #    branches: [ "develop", "feature/**" ]
   workflow_dispatch:
+env:
+  AWS_REGION: us-east-1
 jobs:
   build:
     name: 'Front CI'
@@ -19,3 +21,23 @@ jobs:
           args: >
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+      - name: Set up Node 17 for x64
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.9.0'
+          architecture: 'x64'
+      - name: Install Node Modules
+        run: npm install
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Get Access Token of AWS Cognito
+        run: |
+          echo "AWS_COGNITO_ACCESS_TOKEN=$(aws cognito-idp initiate-auth --auth-flow USER_PASSWORD_AUTH --auth-parameters USERNAME=${{ secrets.AWS_COGNITO_USERNAME }},PASSWORD=${{ secrets.AWS_COGNITO_PASSWORD }},SECRET_HASH=${{ secrets.AWS_COGNITO_SECRET_HASH }} --client-id ${{ secrets.AWS_COGNITO_CLIENT_ID }} --output text --query 'AuthenticationResult.AccessToken')" >> "$GITHUB_ENV"
+      - name: Update environment variables
+        run: echo -e "NEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_BET=https://2bhv3aogu8.execute-api.us-east-1.amazonaws.com\nNEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_PLAY=https://7j6jvfmgh6.execute-api.us-east-1.amazonaws.com\nNEXT_PUBLIC_TOKEN_AWS_COGNITO=$AWS_COGNITO_ACCESS_TOKEN\n" > .env.development
+      - name: Generate Static Content
+        run: npm run build
