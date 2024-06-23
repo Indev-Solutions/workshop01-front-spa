@@ -37,7 +37,9 @@ jobs:
       - name: Get Access Token of AWS Cognito
         run: |
           echo "AWS_COGNITO_ACCESS_TOKEN=$(aws cognito-idp initiate-auth --auth-flow USER_PASSWORD_AUTH --auth-parameters USERNAME=${{ secrets.AWS_COGNITO_USERNAME }},PASSWORD=${{ secrets.AWS_COGNITO_PASSWORD }},SECRET_HASH=${{ secrets.AWS_COGNITO_SECRET_HASH }} --client-id ${{ secrets.AWS_COGNITO_CLIENT_ID }} --output text --query 'AuthenticationResult.AccessToken')" >> "$GITHUB_ENV"
-      - name: Update environment variables
+      - name: Update Environment Variables
         run: echo -e "NEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_BET=https://2bhv3aogu8.execute-api.us-east-1.amazonaws.com\nNEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_PLAY=https://7j6jvfmgh6.execute-api.us-east-1.amazonaws.com\nNEXT_PUBLIC_TOKEN_AWS_COGNITO=$AWS_COGNITO_ACCESS_TOKEN\n" > .env.development
+      - name: Test Environment Variables
+        run: cat .env.development
       - name: Generate Static Content
         run: npm run build
