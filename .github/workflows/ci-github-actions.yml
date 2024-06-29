@@ -41,3 +41,5 @@ jobs:
         run: echo -e "NEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_BET=https://eu14tfviog.execute-api.us-east-1.amazonaws.com\nNEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_PLAY=\nNEXT_PUBLIC_TOKEN_AWS_COGNITO=$AWS_COGNITO_ACCESS_TOKEN\n" > .env.production
       - name: Generate Static Content
         run: npm run build
+      - name: Upload Static Content to S3
+        run: aws s3 cp out s3://my-s3-bucket-extau3/ --recursive
