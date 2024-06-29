@@ -1,8 +1,8 @@
 name: ReactJS CD
 run-name: ${{ github.actor }} is starting the execution of backend pipeline "ReactJS CD" with GitHub Actions
 on:
-#  push:
-#    branches: [ "develop", "feature/**" ]
+  push:
+    branches: [ "master" ]
   workflow_dispatch:
 env:
   AWS_REGION: us-east-1
@@ -11,16 +11,7 @@ jobs:
     name: 'Front CD'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+      - uses: actions/checkout@v4      
       - name: Set up Node 17 for x64
         uses: actions/setup-node@v4
         with:
