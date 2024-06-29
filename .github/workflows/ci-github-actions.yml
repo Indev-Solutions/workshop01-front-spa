@@ -12,28 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
       - name: Set up Node 17 for x64
         uses: actions/setup-node@v4
         with:
           node-version: '20.9.0'
           architecture: 'x64'
-          registry-url: https://npm.pkg.github.com/
       - name: Install Node Modules
         run: npm install
       - name: Execute CI of Front Component
         run: npm ci
 #      - name: Test Front Component
 #        run: npm test
-      - name: Publish Front Component
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
