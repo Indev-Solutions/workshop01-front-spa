@@ -1,8 +1,8 @@
 name: ReactJS CD
 run-name: ${{ github.actor }} is starting the execution of backend pipeline "ReactJS CD" with GitHub Actions
 on:
-#  push:
-#    branches: [ "develop", "feature/**" ]
+  push:
+    branches: [ "master" ]
   workflow_dispatch:
 env:
   AWS_REGION: us-east-1
@@ -11,9 +11,31 @@ jobs:
     name: 'Front CD'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4      
+      - name: Set up Node 17 for x64
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.9.0'
+          architecture: 'x64'
+          registry-url: https://npm.pkg.github.com/
+      - name: Install Node Modules
+        run: npm install
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+      - name: Get Access Token of AWS Cognito
+        run: |
+          echo "AWS_COGNITO_ACCESS_TOKEN=$(aws cognito-idp initiate-auth --auth-flow USER_PASSWORD_AUTH --auth-parameters USERNAME=${{ secrets.AWS_COGNITO_USERNAME }},PASSWORD=${{ secrets.AWS_COGNITO_PASSWORD }},SECRET_HASH=${{ secrets.AWS_COGNITO_SECRET_HASH }} --client-id ${{ secrets.AWS_COGNITO_CLIENT_ID }} --output text --query 'AuthenticationResult.AccessToken')" >> "$GITHUB_ENV"
+      - name: Update Environment Variables
+        run: echo -e "NEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_BET=https://eu14tfviog.execute-api.us-east-1.amazonaws.com\nNEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_PLAY=\nNEXT_PUBLIC_TOKEN_AWS_COGNITO=$AWS_COGNITO_ACCESS_TOKEN\n" > .env.production
+      - name: Generate Static Content
+        run: npm run build
+      - name: Upload Static Content to S3
+        run: aws s3 cp out s3://my-s3-bucket-extau3/ --recursive
+      - name: Publish Front Component
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
