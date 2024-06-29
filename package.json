@@ -1,5 +1,5 @@
 {
-  "private": true,
+  "private": false,
   "scripts": {
     "test": "jest",
     "dev": "next dev",
@@ -18,5 +18,26 @@
     "@types/react": "18.2.37",
     "jest": "^29.7.0",
     "typescript": "5.2.2"
+  },
+  "name": "@indev-solutions/workshop01-front-spa",
+  "description": "Single Page Application for Workshop 01 of Indev Solutions",
+  "version": "0.0.3",
+  "main": "next.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Indev-Solutions/workshop01-front-spa.git"
+  },
+  "keywords": [
+    "indevsolutions",
+    "workshop01"
+  ],
+  "author": "Indev Solutions",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Indev-Solutions/workshop01-front-spa/issues"
+  },
+  "homepage": "https://github.com/Indev-Solutions/workshop01-front-spa#readme",
+  "publishConfig": {
+    "@indev-solutions:registry": "https://npm.pkg.github.com"
   }
 }
