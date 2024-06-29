@@ -7,9 +7,10 @@ on:
 env:
   AWS_REGION: us-east-1
 jobs:
-  build:
+  deploy:
     name: 'Front CD'
     runs-on: ubuntu-latest
+    environment: PRO
     steps:
       - uses: actions/checkout@v4      
       - name: Set up Node 17 for x64
