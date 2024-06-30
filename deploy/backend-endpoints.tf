@@ -30,6 +30,20 @@ data "terraform_remote_state" "msbet" {
   }
 }
 
+data "terraform_remote_state" "frontend" {
+  backend = "s3"
+
+  config = {
+    bucket = "brstworkshop1"
+    key    = "env:/workshop1-pro-frontend/rst/iac"
+    region = var.region
+  }
+}
+
 output "apigateway_endpoint_msbet" {
   value = data.terraform_remote_state.msbet.outputs.apigateway_endpoint
+}
+
+output "s3_bucket_name_spa" {
+  value = data.terraform_remote_state.frontend.outputs.s3_bucket_name
 }

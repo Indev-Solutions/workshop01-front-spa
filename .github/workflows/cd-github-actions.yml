@@ -34,22 +34,27 @@ jobs:
         run: terraform init
       - name: Select Terraform Workspace
         working-directory: deploy
-        run: terraform workspace select -or-create=true workshop1-pro-front
+        run: terraform workspace select -or-create=true workshop1-pro-spa
       - name: Execute Terraform Apply
         working-directory: deploy
         run: terraform apply -var="region=${{ env.AWS_REGION }}" -auto-approve
       - name: Get Endpoint of MicroService Bet
         working-directory: deploy
-        run: terraform output -raw apigateway_endpoint_msbet
+        run: |
+          echo "ENDPOINT_MICROSERVICE_BET=$(terraform output -raw apigateway_endpoint_msbet)" >> "$GITHUB_ENV"
+      - name: Get S3 Bucket Name of Simple Page Application
+        working-directory: deploy
+        run: |
+          echo "S3_BUCKET_NAME_SPA=$(terraform output -raw s3_bucket_name_spa)" >> "$GITHUB_ENV"
       - name: Get Access Token of AWS Cognito
         run: |
           echo "AWS_COGNITO_ACCESS_TOKEN=$(aws cognito-idp initiate-auth --auth-flow USER_PASSWORD_AUTH --auth-parameters USERNAME=${{ secrets.AWS_COGNITO_USERNAME }},PASSWORD=${{ secrets.AWS_COGNITO_PASSWORD }},SECRET_HASH=${{ secrets.AWS_COGNITO_SECRET_HASH }} --client-id ${{ secrets.AWS_COGNITO_CLIENT_ID }} --output text --query 'AuthenticationResult.AccessToken')" >> "$GITHUB_ENV"
       - name: Update Environment Variables
-        run: echo -e "NEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_BET=https://ucw1mllw0l.execute-api.us-east-1.amazonaws.com\nNEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_PLAY=\nNEXT_PUBLIC_TOKEN_AWS_COGNITO=$AWS_COGNITO_ACCESS_TOKEN\n" > .env.production
+        run: echo -e "NEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_BET=$ENDPOINT_MICROSERVICE_BET\nNEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_PLAY=\nNEXT_PUBLIC_TOKEN_AWS_COGNITO=$AWS_COGNITO_ACCESS_TOKEN\n" > .env.production
       - name: Generate Static Content
         run: npm run build
       - name: Upload Static Content to S3
-        run: aws s3 cp out s3://my-s3-bucket-extau3/ --recursive
+        run: aws s3 cp out s3://$S3_BUCKET_NAME_SPA/ --recursive
       - name: Publish Front Component
         run: npm publish
         env:
