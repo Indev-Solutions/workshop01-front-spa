@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: PRO
     steps:
-      - uses: actions/checkout@v4      
+      - uses: actions/checkout@v4
       - name: Set up Node 17 for x64
         uses: actions/setup-node@v4
         with:
@@ -27,6 +27,20 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Execute Terraform Init
+        working-directory: ./deploy
+        run: terraform init
+      - name: Select Terraform Workspace
+        working-directory: ./deploy
+        run: terraform workspace select -or-create=true workshop1-pro-front
+      - name: Execute Terraform Apply
+        working-directory: ./deploy
+        run: terraform apply -auto-approve
+      - name: Get Endpoint of MicroService Bet
+        working-directory: ./deploy
+        run: terraform output -raw apigateway_endpoint_msbet
       - name: Get Access Token of AWS Cognito
         run: |
           echo "AWS_COGNITO_ACCESS_TOKEN=$(aws cognito-idp initiate-auth --auth-flow USER_PASSWORD_AUTH --auth-parameters USERNAME=${{ secrets.AWS_COGNITO_USERNAME }},PASSWORD=${{ secrets.AWS_COGNITO_PASSWORD }},SECRET_HASH=${{ secrets.AWS_COGNITO_SECRET_HASH }} --client-id ${{ secrets.AWS_COGNITO_CLIENT_ID }} --output text --query 'AuthenticationResult.AccessToken')" >> "$GITHUB_ENV"
