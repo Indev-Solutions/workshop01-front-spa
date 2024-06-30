@@ -16,5 +16,20 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Execute Terraform Init
+        working-directory: deploy
+        run: terraform init
+      - name: Select Terraform Workspace
+        working-directory: deploy
+        run: terraform workspace select -or-create=true workshop1-pro-spa
+      - name: Execute Terraform Apply
+        working-directory: deploy
+        run: terraform apply -var="region=${{ env.AWS_REGION }}" -auto-approve
+      - name: Get S3 Bucket Name of Simple Page Application
+        working-directory: deploy
+        run: |
+          echo "S3_BUCKET_NAME_SPA=$(terraform output -raw s3_bucket_name_spa)" >> "$GITHUB_ENV"
       - name: Remove Static Content from S3
-        run: aws s3 rm s3://my-s3-bucket-extau3 --recursive
+        run: aws s3 rm s3://$S3_BUCKET_NAME_SPA --recursive
