@@ -15,6 +15,11 @@ terraform {
   required_version = "~> 1.7"
 }
 
+variable "region" {
+  type        = string
+  description = "AWS region for all cloud resources"
+}
+
 data "terraform_remote_state" "msbet" {
   backend = "s3"
 
