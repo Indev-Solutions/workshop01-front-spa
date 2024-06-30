@@ -30,16 +30,16 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
       - name: Execute Terraform Init
-        working-directory: ./deploy
+        working-directory: deploy
         run: terraform init
       - name: Select Terraform Workspace
-        working-directory: ./deploy
+        working-directory: deploy
         run: terraform workspace select -or-create=true workshop1-pro-front
       - name: Execute Terraform Apply
-        working-directory: ./deploy
+        working-directory: deploy
         run: terraform apply -auto-approve
       - name: Get Endpoint of MicroService Bet
-        working-directory: ./deploy
+        working-directory: deploy
         run: terraform output -raw apigateway_endpoint_msbet
       - name: Get Access Token of AWS Cognito
         run: |
