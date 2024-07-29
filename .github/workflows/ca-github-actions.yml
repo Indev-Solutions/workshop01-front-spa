@@ -1,5 +1,5 @@
 name: ReactJS Code Analysis
-run-name: ${{ github.actor }} is starting the execution of backend pipeline "ReactJS Code Analysis" with GitHub Actions
+run-name: ${{ github.actor }} is starting the execution of frontend pipeline "ReactJS Code Analysis" with GitHub Actions
 on:
   pull_request:
     branches: [ "develop", "master" ]

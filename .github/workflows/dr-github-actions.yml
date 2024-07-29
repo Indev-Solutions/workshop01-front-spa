@@ -1,5 +1,5 @@
 name: ReactJS Deployment Removal
-run-name: ${{ github.actor }} is starting the execution of backend pipeline "ReactJS Deployment Removal" with GitHub Actions
+run-name: ${{ github.actor }} is starting the execution of frontend pipeline "ReactJS Deployment Removal" with GitHub Actions
 on:
   workflow_dispatch:
 env:
