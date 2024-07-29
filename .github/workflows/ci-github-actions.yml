@@ -1,5 +1,5 @@
 name: ReactJS CI
-run-name: ${{ github.actor }} is starting the execution of backend pipeline "ReactJS CI" with GitHub Actions
+run-name: ${{ github.actor }} is starting the execution of frontend pipeline "ReactJS CI" with GitHub Actions
 on:
   push:
     branches: [ "develop", "feature/**" ]

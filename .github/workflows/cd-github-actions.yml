@@ -1,5 +1,5 @@
 name: ReactJS CD
-run-name: ${{ github.actor }} is starting the execution of backend pipeline "ReactJS CD" with GitHub Actions
+run-name: ${{ github.actor }} is starting the execution of frontend pipeline "ReactJS CD" with GitHub Actions
 on:
   push:
     branches: [ "master" ]
@@ -59,3 +59,13 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Send Message to Slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "text": "The execution of frontend pipeline 'ReactJS CD' with GitHub Actions have finished"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
