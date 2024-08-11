@@ -292,7 +292,7 @@ function Soccer({ initialData }) {
                 </form>
               </div>
               <div></div>
-              <div id="error-message" className="column-left medium-text">No se pudo registrar apuesta.</div>
+              <div id="error-message" className="column-left medium-text">version 0.0.11</div>
               <div></div>
               <div className="horizontal-separator"></div>
               <div className="horizontal-separator"></div>
@@ -341,7 +341,7 @@ export async function getStaticProps() {
   const token = process.env.NEXT_PUBLIC_TOKEN_AWS_COGNITO;
   
   // Set API endpoint
-  const endpoint = process.env.NEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_BET + '/workshop/bets?leagueId=1' /*+ '&status=1'*/;
+  const endpoint = process.env.NEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_BET + '/workshop/bets?leagueId=1&status=1';
 
   // Build the request
   const options = {
