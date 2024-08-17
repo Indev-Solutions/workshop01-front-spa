@@ -42,6 +42,10 @@ jobs:
         working-directory: deploy
         run: |
           echo "ENDPOINT_MICROSERVICE_BET=$(terraform output -raw apigateway_endpoint_msbet)" >> "$GITHUB_ENV"
+      - name: Get Endpoint of MicroService Play
+        working-directory: deploy
+        run: |
+          echo "ENDPOINT_MICROSERVICE_PLAY=$(terraform output -raw apigateway_endpoint_msplay)" >> "$GITHUB_ENV"
       - name: Get S3 Bucket Name of Simple Page Application
         working-directory: deploy
         run: |
@@ -50,7 +54,7 @@ jobs:
         run: |
           echo "AWS_COGNITO_ACCESS_TOKEN=$(aws cognito-idp initiate-auth --auth-flow USER_PASSWORD_AUTH --auth-parameters USERNAME=${{ secrets.AWS_COGNITO_USERNAME }},PASSWORD=${{ secrets.AWS_COGNITO_PASSWORD }},SECRET_HASH=${{ secrets.AWS_COGNITO_SECRET_HASH }} --client-id ${{ secrets.AWS_COGNITO_CLIENT_ID }} --output text --query 'AuthenticationResult.AccessToken')" >> "$GITHUB_ENV"
       - name: Update Environment Variables
-        run: echo -e "NEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_BET=$ENDPOINT_MICROSERVICE_BET\nNEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_PLAY=\nNEXT_PUBLIC_TOKEN_AWS_COGNITO=$AWS_COGNITO_ACCESS_TOKEN\n" > .env.production
+        run: echo -e "NEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_BET=$ENDPOINT_MICROSERVICE_BET\nNEXT_PUBLIC_PREFIX_ENDPOINT_MICROSERVICE_PLAY=$ENDPOINT_MICROSERVICE_PLAY\nNEXT_PUBLIC_TOKEN_AWS_COGNITO=$AWS_COGNITO_ACCESS_TOKEN\n" > .env.production
       - name: Generate Static Content
         run: npm run build
       - name: Upload Static Content to S3
